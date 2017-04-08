@@ -75,7 +75,7 @@ public class GradeBookResource {
             GradeBookItem existingItem = gradeBookItemMap.get(requestItemId);
             List<Student> existingStudents = existingItem.getStudents();
 
-            // checking if grade item and student record already exists
+            // checking if grade item and oldStudent record already exists
             for (Student existStudent : existingStudents) {
                 if (existStudent.getId() == requestedStudentId) {
                     doesExist = true;
@@ -90,10 +90,10 @@ public class GradeBookResource {
             if (!doesExist) {
                 LOG.debug("Attempting to create a student grade item resource and setting it to {}", content);
 
-                // retrieving details of student from request
+                // retrieving details of oldStudent from request
                 Student requestedStudent = requestedGradeBookItem.getStudents().get(0);
 
-                // creating a new student and updating the grade item
+                // creating a new oldStudent and updating the grade item
                 Student newStudent = new Student();
                 newStudent.setId(requestedStudentId);
                 newStudent.setName(requestedStudent.getName());
@@ -149,7 +149,7 @@ public class GradeBookResource {
 
                 response = Response.status(Response.Status.GONE).entity("No Gradebook item resource to return").build();
 
-            } else { // if grading item exists, then check if the requested student details are present
+            } else { // if grading item exists, then check if the requested oldStudent details are present
 
                 List<Student> existingStudents = existingItem.getStudents();
                 for (Student student : existingStudents) {
@@ -163,7 +163,7 @@ public class GradeBookResource {
                     }
                 }
 
-                // if the requested student is not found
+                // if the requested oldStudent is not found
                 if (!doesExist) {
                     LOG.info("Creating a {} {} Status Response", Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
                     response = Response.status(Response.Status.NOT_FOUND).entity("No Gradebook Resource to return").build();
@@ -181,47 +181,74 @@ public class GradeBookResource {
     }
 
     @PUT
-    @Path("{id}")
+    @Path("{sid}")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Response updateResource(@PathParam("id") String id, String content) {
-        LOG.info("Updating the Gradebook Resource {} with {}", gradeBookItem, content);
+    public Response updateGradeBookItem(@PathParam("sid") String studentId, String content) {
         LOG.debug("PUT request");
-        LOG.debug("PathParam id = {}", id);
+        LOG.debug("PathParam id = {}", studentId);
         LOG.debug("Request Content = {}", content);
 
-        Response response;
+        Response response = null;
+        boolean doesExist = false;
+        int requestedStudentId = Integer.parseInt(studentId);
+        GradeBookItem requestedGradeBookItem = null;
 
-        if (gradeBookItem != null) {
-            LOG.debug("Attempting to update the Gradebook Resource {}", gradeBookItem);
+        try {
+            requestedGradeBookItem = (GradeBookItem) Converter.convertFromXmlToObject(content, GradeBookItem.class);
+            int requestedItemId = requestedGradeBookItem.getItemId();
+            GradeBookItem existingItem = gradeBookItemMap.get(requestedItemId);
 
-            try {
-                gradeBookItem = (GradeBookItem) Converter.convertFromXmlToObject(content, GradeBookItem.class);
-                LOG.debug("The XML {} was converted to the object {}", content, gradeBookItem);
+            // checking if the grading item exists or not
+            if (existingItem == null) {
+                LOG.info("Creating a {} {} Status Response", Response.Status.CONFLICT.getStatusCode(), Response.Status.CONFLICT.getReasonPhrase());
+                LOG.debug("Cannot update gradebook item resource {} as it has not yet been created");
+                response = Response.status(Response.Status.CONFLICT).entity(content).build();
 
-                LOG.debug("Updated Gradebook Resource to {}", gradeBookItem);
-                LOG.info("Creating a {} {} Status Response", Response.Status.OK.getStatusCode(), Response.Status.OK.getReasonPhrase());
+            } else { // checking if the student record that needs to be updated exists
 
-                String xmlString = Converter.convertFromObjectToXml(gradeBookItem, GradeBookItem.class);
+                Student updatedStudent = requestedGradeBookItem.getStudents().get(0);
+                List<Student> existingStudents = existingItem.getStudents();
+                for (Student oldStudent : existingStudents) {
+                    if (oldStudent.getId() == requestedStudentId) {
+                        doesExist = true;
 
-                response = Response.status(Response.Status.OK).entity(xmlString).build();
-            } catch (JAXBException e) {
-                LOG.info("Creating a {} {} Status Response", Response.Status.BAD_REQUEST.getStatusCode(), Response.Status.BAD_REQUEST.getReasonPhrase());
-                LOG.debug("XML is {} is incompatible with Appointment Resource", content);
+                        oldStudent.setName(updatedStudent.getName());
+                        oldStudent.setFeedback(updatedStudent.getFeedback());
+                        oldStudent.setScore(updatedStudent.getScore());
 
-                response = Response.status(Response.Status.BAD_REQUEST).entity(content).build();
-            } catch (RuntimeException e) {
-                LOG.debug("Catch All exception");
+                        existingItem.setStudents(existingStudents);
+                        gradeBookItemMap.put(requestedItemId, existingItem);
 
-                LOG.info("Creating a {} {} Status Response", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
+                        LOG.debug("The XML {} was converted to the object {}", content, oldStudent);
 
-                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(content).build();
+                        LOG.debug("Updated Gradebook student resource to {}", oldStudent);
+                        LOG.info("Creating a {} {} Status Response", Response.Status.OK.getStatusCode(), Response.Status.OK.getReasonPhrase());
+
+                        String xmlString = Converter.convertFromObjectToXml(oldStudent, Student.class);
+                        response = Response.status(Response.Status.OK).entity(xmlString).build();
+                    }
+                }
+
+                if (!doesExist) {
+                    LOG.info("Creating a {} {} Status Response", Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
+                    LOG.debug("Cannot update gradebook student item resource as its not available");
+                    response = Response.status(Response.Status.NOT_FOUND).entity(content).build();
+                }
             }
-        } else {
-            LOG.info("Creating a {} {} Status Response", Response.Status.CONFLICT.getStatusCode(), Response.Status.CONFLICT.getReasonPhrase());
-            LOG.debug("Cannot update Appointment Resource {} as it has not yet been created", gradeBookItem);
+        } catch (JAXBException e) {
+            LOG.error("Error: " + e);
+            LOG.info("Creating a {} {} Status Response", Response.Status.BAD_REQUEST.getStatusCode(), Response.Status.BAD_REQUEST.getReasonPhrase());
+            LOG.debug("XML is {} is incompatible with Gradebook Resource", content);
 
-            response = Response.status(Response.Status.CONFLICT).entity(content).build();
+            response = Response.status(Response.Status.BAD_REQUEST).entity(content).build();
+
+        } catch (RuntimeException e) {
+            LOG.error("Error: " + e);
+            LOG.debug("Catch All exception");
+            LOG.info("Creating a {} {} Status Response", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
+
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(content).build();
         }
 
         LOG.debug("Generated response {}", response);
@@ -229,12 +256,11 @@ public class GradeBookResource {
     }
 
     @DELETE
-    @Path("{id}")
+    @Path("{itemId}/{sid}")
     @Produces(MediaType.APPLICATION_XML)
-    public Response deleteResource(@PathParam("id") String id) {
-        LOG.info("Removing the Gradebook Resource {}", gradeBookItem);
+    public Response deleteResource(@PathParam("itemId") String itemId, @PathParam("sid") String studentId) {
         LOG.debug("DELETE request");
-        LOG.debug("PathParam id = {}", id);
+        LOG.debug("PathParam id = {}", itemId + ", " + studentId);
 
         Response response = null;
         boolean isFound = false;
