@@ -10,9 +10,6 @@
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
-    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-      <Dimension value="[650, 440]"/>
-    </Property>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
@@ -68,8 +65,8 @@
                                       <Component id="jComboBoxGradeItems" max="32767" attributes="0"/>
                                       <Component id="jTextFieldItemMaxScore" max="32767" attributes="0"/>
                                       <Component id="jTextFieldStudentId" alignment="0" max="32767" attributes="0"/>
-                                      <Component id="jTextFieldScore" alignment="0" max="32767" attributes="0"/>
-                                      <Component id="jTextField1" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="jTextFieldStudentScore" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="jTextFieldFeedback" alignment="0" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
@@ -98,7 +95,7 @@
                       </Group>
                   </Group>
               </Group>
-              <EmptySpace pref="70" max="32767" attributes="0"/>
+              <EmptySpace pref="136" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -117,14 +114,12 @@
                   <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jRadioButtonRead" min="-2" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jTextFieldItemMaxScore" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jTextFieldItemMaxScore" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jRadioButtonRead" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="jRadioButtonUpdate" min="-2" max="-2" attributes="0"/>
@@ -140,14 +135,14 @@
                       <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jTextFieldScore" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jTextFieldStudentScore" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel7" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jTextField1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jTextFieldFeedback" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="jButtonCrudSubmit" min="-2" max="-2" attributes="0"/>
@@ -266,7 +261,7 @@
         <Property name="toolTipText" type="java.lang.String" value="Student ID"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="jTextFieldScore">
+    <Component class="javax.swing.JTextField" name="jTextFieldStudentScore">
       <Properties>
         <Property name="toolTipText" type="java.lang.String" value="Student Score"/>
       </Properties>
@@ -276,7 +271,7 @@
         <Property name="text" type="java.lang.String" value="Feedback :"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="jTextField1">
+    <Component class="javax.swing.JTextField" name="jTextFieldFeedback">
       <Properties>
         <Property name="toolTipText" type="java.lang.String" value="Feedback for Student"/>
       </Properties>
@@ -285,6 +280,9 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Submit"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonCrudSubmitActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel8">
       <Properties>
