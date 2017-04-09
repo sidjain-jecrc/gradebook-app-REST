@@ -32,7 +32,7 @@ import sid.asu.rest.server.sjain.jaxb.util.Converter;
  *
  * @author Siddharth
  */
-@Path("GradeBook")
+@Path("gradebook")
 public class GradeBookResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(GradeBookResource.class);
@@ -159,9 +159,6 @@ public class GradeBookResource {
                         doesExist = true;
                         LOG.info("Creating a {} {} Status Response", Response.Status.OK.getStatusCode(), Response.Status.OK.getReasonPhrase());
                         LOG.debug("Retrieving the student resource {}", student.getId() + ", " + student.getName());
-
-                        String xmlString = Converter.convertFromObjectToXml(student, Student.class);
-                        response = Response.status(Response.Status.OK).entity(xmlString).build();
                         break;
                     }
                 }
@@ -170,6 +167,10 @@ public class GradeBookResource {
                 if (!doesExist) {
                     LOG.info("Creating a {} {} Status Response", Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
                     response = Response.status(Response.Status.NOT_FOUND).entity("No Gradebook Resource to return").build();
+                } else {
+                    String xmlString = Converter.convertFromObjectToXml(existingItem, GradeBookItem.class);
+                    response = Response.status(Response.Status.OK).entity(xmlString).build();
+
                 }
             }
         } catch (Exception e) {

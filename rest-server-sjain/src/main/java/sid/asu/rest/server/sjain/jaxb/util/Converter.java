@@ -17,8 +17,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Siddharth
- * Code Reference taken from Professor Frank Callis
+ * Code taken from professor Frank Callis's sample project
  */
 public class Converter {
 
