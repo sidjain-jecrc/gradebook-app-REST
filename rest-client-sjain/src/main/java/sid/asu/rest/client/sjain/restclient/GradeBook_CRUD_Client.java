@@ -42,11 +42,13 @@ public class GradeBook_CRUD_Client {
         return webResource.type(MediaType.APPLICATION_XML).post(ClientResponse.class, requestEntity);
     }
 
-    public ClientResponse deleteGradeBookItem(String id) throws UniformInterfaceException {
+    public ClientResponse deleteGradeBookItem(String itemId, String sid) throws UniformInterfaceException {
         LOG.info("Initiating a Delete request");
-        LOG.debug("Id = {}", id);
+        LOG.debug("itemId = {}", itemId);
+        LOG.debug("sid = {}", sid);
+        String queryParams = itemId + "/" + sid;
 
-        return webResource.path(id).delete(ClientResponse.class);
+        return webResource.path(queryParams).delete(ClientResponse.class);
     }
 
     public ClientResponse updateGradeBookItem(Object requestEntity, String id) throws UniformInterfaceException {

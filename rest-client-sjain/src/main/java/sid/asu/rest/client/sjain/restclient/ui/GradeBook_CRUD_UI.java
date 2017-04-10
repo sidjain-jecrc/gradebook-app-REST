@@ -81,14 +81,10 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
             Student student = new Student();
 
             if (jRadioButtonCreate.isSelected() || jRadioButtonUpdate.isSelected()) {
-                if (!itemMaxScore.equals("") && !studentId.equals("") && !studentScore.equals("") && !studentFeedback.equals("")) {
-                    gradeBookItem.setItemMax(Integer.parseInt(itemMaxScore));
-                    student.setId(Integer.parseInt(studentId));
-                    student.setScore(Integer.parseInt(studentScore));
-                    student.setFeedback(studentFeedback);
-                } else {
-                    jLabelEmptyError.setVisible(true);
-                }
+                gradeBookItem.setItemMax(Integer.parseInt(itemMaxScore));
+                student.setId(Integer.parseInt(studentId));
+                student.setScore(Integer.parseInt(studentScore));
+                student.setFeedback(studentFeedback);
             } else {
                 if (!itemMaxScore.equals("")) {
                     gradeBookItem.setItemMax(Integer.parseInt(itemMaxScore));
@@ -204,9 +200,19 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
 
         buttonGroupCrud.add(jRadioButtonCreate);
         jRadioButtonCreate.setText("Create");
+        jRadioButtonCreate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonCreateActionPerformed(evt);
+            }
+        });
 
         buttonGroupCrud.add(jRadioButtonRead);
         jRadioButtonRead.setText("Read");
+        jRadioButtonRead.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonReadActionPerformed(evt);
+            }
+        });
 
         buttonGroupCrud.add(jRadioButtonUpdate);
         jRadioButtonUpdate.setText("Update");
@@ -218,6 +224,11 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
 
         buttonGroupCrud.add(jRadioButtonDelete);
         jRadioButtonDelete.setText("Delete");
+        jRadioButtonDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonDeleteActionPerformed(evt);
+            }
+        });
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
         jLabel2.setText("Grade Book Values");
@@ -294,11 +305,11 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                             .addComponent(jLabel11))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jTextFieldHttpStatusCode, javax.swing.GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE)
-                                .addComponent(jTextFieldMediaType))
-                            .addComponent(jTextFieldResourceLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(50, Short.MAX_VALUE))
+                            .addComponent(jTextFieldResourceLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 354, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(jTextFieldHttpStatusCode, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                                .addComponent(jTextFieldMediaType, javax.swing.GroupLayout.Alignment.LEADING)))))
+                .addContainerGap(46, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -312,7 +323,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(38, 38, 38)
                         .addComponent(jLabel1)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 119, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -351,8 +362,8 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(27, 27, 27)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel2))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -399,9 +410,9 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                     .addComponent(jLabel9)
                     .addComponent(jTextFieldHttpStatusCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel10)
-                    .addComponent(jTextFieldMediaType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldMediaType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel10))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
@@ -418,17 +429,26 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
         if (jRadioButtonCreate.isSelected()) { // create gradebook item
             LOG.debug("Invoking {} action", jRadioButtonCreate.getText());
             jLabelError.setVisible(false);
+            jLabelEmptyError.setVisible(false);
 
-            ClientResponse clientResponse = gradeBook_CRUD_client.createGradeBookItem(this.convertFormToXMLString());
+            String itemMaxScore = jTextFieldItemMaxScore.getText();
+            String studentId = jTextFieldStudentId.getText();
+            String studentScore = jTextFieldStudentScore.getText();
+            String studentFeedback = jTextFieldFeedback.getText();
 
-            resourceURI = clientResponse.getLocation();
-            LOG.debug("Retrieved location {}", resourceURI);
-
-            this.populateForm(clientResponse);
+            if (!itemMaxScore.equals("") && !studentId.equals("") && !studentScore.equals("") && !studentFeedback.equals("")) {
+                ClientResponse clientResponse = gradeBook_CRUD_client.createGradeBookItem(this.convertFormToXMLString());
+                resourceURI = clientResponse.getLocation();
+                LOG.debug("Retrieved location {}", resourceURI);
+                this.populateForm(clientResponse);
+            } else {
+                jLabelEmptyError.setVisible(true);
+            }
 
         } else if (jRadioButtonRead.isSelected()) { // read gradebook item
             LOG.debug("Invoking {} action", jRadioButtonRead.getText());
             jLabelError.setVisible(false);
+            jLabelEmptyError.setVisible(false);
 
             String gradeItem = jComboBoxGradeItems.getSelectedItem().toString();
             String gradeItemId = null;
@@ -448,27 +468,60 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
             }
 
             String studentId = jTextFieldStudentId.getText();
-
-            ClientResponse clientResponse = gradeBook_CRUD_client.retrieveGradeBookItem(ClientResponse.class, gradeItemId, studentId);
-            this.populateForm(clientResponse);
+            if (!studentId.equals("")) {
+                ClientResponse clientResponse = gradeBook_CRUD_client.retrieveGradeBookItem(ClientResponse.class, gradeItemId, studentId);
+                this.populateForm(clientResponse);
+            } else {
+                jLabelEmptyError.setVisible(true);
+            }
 
         } else if (jRadioButtonUpdate.isSelected()) { // update gradebook item
             LOG.debug("Invoking {} action", jRadioButtonUpdate.getText());
             jLabelError.setVisible(false);
+            jLabelEmptyError.setVisible(false);
 
+            String itemMaxScore = jTextFieldItemMaxScore.getText();
             String studentId = jTextFieldStudentId.getText();
+            String studentScore = jTextFieldStudentScore.getText();
+            String studentFeedback = jTextFieldFeedback.getText();
 
-            ClientResponse clientResponse = gradeBook_CRUD_client.updateGradeBookItem(ClientResponse.class, studentId);
-            this.populateForm(clientResponse);
+            if (!itemMaxScore.equals("") && !studentId.equals("") && !studentScore.equals("") && !studentFeedback.equals("")) {
+                ClientResponse clientResponse = gradeBook_CRUD_client.updateGradeBookItem(this.convertFormToXMLString(), studentId);
+                this.populateForm(clientResponse);
+            } else {
+                jLabelEmptyError.setVisible(true);
+            }
 
         } else if (jRadioButtonDelete.isSelected()) { // delete gradebook item
             LOG.debug("Invoking {} action", jRadioButtonUpdate.getText());
             jLabelError.setVisible(false);
+            jLabelEmptyError.setVisible(false);
+
+            String gradeItem = jComboBoxGradeItems.getSelectedItem().toString();
+
+            String gradeItemId = null;
+            switch (gradeItem) {
+                case "Assignment (30%)":
+                    gradeItemId = Integer.toString(ASSIGNMENTS);
+                    break;
+                case "Mid Term (30%)":
+                    gradeItemId = Integer.toString(MID_TERM);
+                    break;
+                case "Final Exam (40%)":
+                    gradeItemId = Integer.toString(FINAL_EXAM);
+                    break;
+                default:
+                    LOG.error("Something went wrong while fetching data from combox box");
+                    break;
+            }
 
             String studentId = jTextFieldStudentId.getText();
-
-            ClientResponse clientResponse = gradeBook_CRUD_client.deleteGradeBookItem(studentId);
-            jTextFieldHttpStatusCode.setText(Integer.toString(clientResponse.getStatus()));
+            if (!studentId.equals("")) {
+                ClientResponse clientResponse = gradeBook_CRUD_client.deleteGradeBookItem(gradeItemId, studentId);
+                jTextFieldHttpStatusCode.setText(Integer.toString(clientResponse.getStatus()));
+            } else {
+                jLabelEmptyError.setVisible(true);
+            }
 
         } else {
             jLabelError.setVisible(true);
@@ -488,7 +541,46 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
 
     private void jRadioButtonUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonUpdateActionPerformed
         // TODO add your handling code here:
+        jTextFieldItemMaxScore.setText("");
+        jTextFieldFeedback.setText("");
+        jTextFieldHttpStatusCode.setText("");
+        jTextFieldMediaType.setText("");
+        jTextFieldResourceLocation.setText("");
+        jTextFieldStudentScore.setText("");
+
     }//GEN-LAST:event_jRadioButtonUpdateActionPerformed
+
+    private void jRadioButtonCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonCreateActionPerformed
+        // TODO add your handling code here:
+        jTextFieldItemMaxScore.setText("");
+        jTextFieldFeedback.setText("");
+        jTextFieldHttpStatusCode.setText("");
+        jTextFieldMediaType.setText("");
+        jTextFieldResourceLocation.setText("");
+        jTextFieldStudentScore.setText("");
+
+    }//GEN-LAST:event_jRadioButtonCreateActionPerformed
+
+    private void jRadioButtonReadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonReadActionPerformed
+        // TODO add your handling code here:
+        jTextFieldItemMaxScore.setText("");
+        jTextFieldFeedback.setText("");
+        jTextFieldHttpStatusCode.setText("");
+        jTextFieldMediaType.setText("");
+        jTextFieldResourceLocation.setText("");
+        jTextFieldStudentScore.setText("");
+    }//GEN-LAST:event_jRadioButtonReadActionPerformed
+
+    private void jRadioButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonDeleteActionPerformed
+        // TODO add your handling code here:
+        jTextFieldItemMaxScore.setText("");
+        jTextFieldFeedback.setText("");
+        jTextFieldHttpStatusCode.setText("");
+        jTextFieldMediaType.setText("");
+        jTextFieldResourceLocation.setText("");
+        jTextFieldStudentScore.setText("");
+
+    }//GEN-LAST:event_jRadioButtonDeleteActionPerformed
 
     /**
      * @param args the command line arguments
