@@ -40,20 +40,20 @@ public class GradeBookResource {
     private static final int ASSIGNMENTS = 500;
     private static final int MID_TERM = 501;
     private static final int FINAL = 502;
-    private static HashMap<Integer, GradeBookItem> gradeBookItemMap = null;
+    private static HashMap<Integer, GradeBookItem> gradeBookItemMap = new HashMap<Integer, GradeBookItem>() {
+        {
+            put(ASSIGNMENTS, new GradeBookItem());
+            put(MID_TERM, new GradeBookItem());
+            put(FINAL, new GradeBookItem());
+        }
+    };
+    ;
 
     @Context
     private UriInfo context;
 
     public GradeBookResource() {
         LOG.info("Creating a Gradebook Resource");
-        gradeBookItemMap = new HashMap<Integer, GradeBookItem>() {
-            {
-                put(ASSIGNMENTS, new GradeBookItem());
-                put(MID_TERM, new GradeBookItem());
-                put(FINAL, new GradeBookItem());
-            }
-        };
     }
 
     @POST
@@ -76,9 +76,9 @@ public class GradeBookResource {
 
             GradeBookItem existingItem = gradeBookItemMap.get(requestItemId);
             LOG.debug("Existing Item = {}", existingItem);
-            if(existingItem.getItemId() == 0 && existingItem.getItemName() == null && existingItem.getItemMax() == 0){
+            if (existingItem.getItemId() == 0 && existingItem.getItemName() == null && existingItem.getItemMax() == 0) {
                 LOG.debug("<---Existing Item values setting--->");
-            
+
                 existingItem.setItemId(requestItemId);
                 existingItem.setItemName(requestedGradeBookItem.getItemName());
                 existingItem.setItemMax(requestedGradeBookItem.getItemMax());
@@ -153,7 +153,7 @@ public class GradeBookResource {
     public Response getGradeBookItem(@PathParam("itemId") String itemId, @PathParam("sid") String studentId) {
 
         LOG.debug("GET request");
-        LOG.debug("PathParam id = {}", studentId);
+        LOG.debug("PathParam id = {}, {}", itemId, studentId);
 
         Response response = null;
         boolean doesExist = false;
@@ -162,20 +162,25 @@ public class GradeBookResource {
 
         try {
             GradeBookItem existingItem = gradeBookItemMap.get(requestedItemId);
-            if (existingItem == null) {
+            LOG.debug("Existing item id = {}, name = {}, max score = {}", existingItem.getItemId(), existingItem.getItemName(), existingItem.getItemMax());
+
+            if (existingItem.getStudents() == null) {
+                LOG.debug("Existing item students = {}", existingItem.getStudents());
                 LOG.info("Creating a {} {} Status Response", Response.Status.GONE.getStatusCode(), Response.Status.GONE.getReasonPhrase());
-                LOG.debug("No GradeBook item Resource to return");
 
                 response = Response.status(Response.Status.GONE).entity("No Gradebook item resource to return").build();
 
             } else { // if grading item exists, then check if the requested student details are present
 
                 List<Student> existingStudents = existingItem.getStudents();
+                LOG.debug("Existing Students = {}", existingStudents);
+
                 for (Student student : existingStudents) {
                     if (student.getId() == requestedStudentId) {
+                        LOG.debug("Requested studentId {} found", student.getId());
+
                         doesExist = true;
                         LOG.info("Creating a {} {} Status Response", Response.Status.OK.getStatusCode(), Response.Status.OK.getReasonPhrase());
-                        LOG.debug("Retrieving the student resource {}", student.getId());
                         break;
                     }
                 }
@@ -183,7 +188,7 @@ public class GradeBookResource {
                 // if the requested student is not found
                 if (!doesExist) {
                     LOG.info("Creating a {} {} Status Response", Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
-                    response = Response.status(Response.Status.NOT_FOUND).entity("No Gradebook Resource to return").build();
+                    response = Response.status(Response.Status.NOT_FOUND).entity("Requested student record found").build();
                 } else {
                     String xmlString = Converter.convertFromObjectToXml(existingItem, GradeBookItem.class);
                     response = Response.status(Response.Status.OK).entity(xmlString).build();
@@ -193,7 +198,7 @@ public class GradeBookResource {
             LOG.error("Error: " + e);
             LOG.info("Creating a {} {} Status Response", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
 
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Requested resource not found").build();
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error: check the server logs").build();
         }
 
         LOG.debug("Returning the value {}", response);
