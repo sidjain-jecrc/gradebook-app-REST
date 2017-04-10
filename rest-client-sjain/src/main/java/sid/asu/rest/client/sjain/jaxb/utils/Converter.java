@@ -24,9 +24,7 @@ public class Converter {
     private static final Logger LOG = LoggerFactory.getLogger(Converter.class);
 
     public static Object convertFromXmlToObject(Object xmlString, Class... type) throws JAXBException {
-        LOG.info("Converting from XML to an Object");
-        LOG.debug("Object xmlString = {}", xmlString);
-        LOG.debug("Class... type = {}", (Object) type);
+        LOG.debug("Converting from XML to an Object");
 
         Object result;
 
@@ -44,21 +42,21 @@ public class Converter {
     }
 
     public static String convertFromObjectToXml(Object source, Class... type) {
-        LOG.info("Converting from and Object to XML");
-        LOG.debug("Object source = {}", source);
-        LOG.debug("Class... type = {}", (Object) type);
+        LOG.debug("Converting from and Object to XML");
 
         String result;
         StringWriter sw = new StringWriter();
         try {
             JAXBContext context = JAXBContext.newInstance(type);
             Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             marshaller.marshal(source, sw);
             result = sw.toString();
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
 
+        LOG.debug("Object in XmlString : " + result);
         return result;
     }
 

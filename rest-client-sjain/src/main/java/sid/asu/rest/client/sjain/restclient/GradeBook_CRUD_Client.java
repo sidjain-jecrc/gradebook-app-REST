@@ -38,7 +38,6 @@ public class GradeBook_CRUD_Client {
 
     public ClientResponse createGradeBookItem(Object requestEntity) throws UniformInterfaceException {
         LOG.info("Initiating a Create request");
-        LOG.debug("XML String = {}", (String) requestEntity);
 
         return webResource.type(MediaType.APPLICATION_XML).post(ClientResponse.class, requestEntity);
     }
@@ -58,14 +57,14 @@ public class GradeBook_CRUD_Client {
         return webResource.path(id).type(MediaType.APPLICATION_XML).put(ClientResponse.class, requestEntity);
     }
 
-    public <T> T retrieveGradeBookItem(Class<T> responseType, String id) throws UniformInterfaceException {
+    public <T> T retrieveGradeBookItem(Class<T> responseType, String itemId, String sid) throws UniformInterfaceException {
         LOG.info("Initiating a Retrieve request");
         LOG.debug("responseType = {}", responseType.getClass());
-        LOG.debug("Id = {}", id);
+        LOG.debug("itemId = {}", itemId);
+        LOG.debug("sid = {}", sid);
+        String queryParams = itemId + "/" + sid;
 
-        //WebResource resource = webResource;
-        //resource = resource.path(id);
-        return webResource.path(id).accept(MediaType.APPLICATION_XML).get(responseType);
+        return webResource.path(queryParams).accept(MediaType.APPLICATION_XML).get(responseType);
     }
 
     public void close() {
