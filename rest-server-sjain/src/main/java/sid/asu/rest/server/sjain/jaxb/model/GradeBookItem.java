@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlType;
  * @author Siddharth
  */
 @XmlRootElement(name = "GradeItem")
-@XmlType(propOrder = {"ItemId", "ItemName", "ItemMax", "Student"})
+@XmlType(propOrder = {"itemId", "itemName", "itemMax", "students"})
 public class GradeBookItem {
 
     private int itemId;
@@ -33,7 +33,7 @@ public class GradeBookItem {
         this.students = students;
     }
 
-    @XmlElement(name = "ItemId")
+    @XmlElement(name = "itemId")
     public int getItemId() {
         return itemId;
     }
@@ -42,7 +42,7 @@ public class GradeBookItem {
         this.itemId = itemId;
     }
 
-    @XmlElement(name = "ItemName")
+    @XmlElement(name = "itemName")
     public String getItemName() {
         return itemName;
     }
@@ -51,7 +51,7 @@ public class GradeBookItem {
         this.itemName = itemName;
     }
 
-    @XmlElement(name = "ItemMax")
+    @XmlElement(name = "itemMax")
     public int getItemMax() {
         return itemMax;
     }
@@ -60,7 +60,7 @@ public class GradeBookItem {
         this.itemMax = itemMax;
     }
 
-    @XmlElement(name = "Student")
+    @XmlElement(name = "students")
     public List<Student> getStudents() {
         return students;
     }

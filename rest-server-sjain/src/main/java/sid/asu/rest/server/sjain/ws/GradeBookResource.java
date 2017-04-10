@@ -6,6 +6,7 @@
 package sid.asu.rest.server.sjain.ws;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
@@ -56,10 +57,9 @@ public class GradeBookResource {
     }
 
     @POST
-    @Path("{id}")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Response createGradeBookItem(@PathParam("id") String studentId, String content) {
+    public Response createGradeBookItem(String content) {
 
         LOG.debug("POST request");
         LOG.debug("Request Content = {}", content);
@@ -67,18 +67,35 @@ public class GradeBookResource {
         GradeBookItem requestedGradeBookItem = null;
         Response response = null;
         boolean doesExist = false;
-        int requestedStudentId = Integer.parseInt(studentId);
 
         try {
             requestedGradeBookItem = (GradeBookItem) Converter.convertFromXmlToObject(content, GradeBookItem.class);
             int requestItemId = requestedGradeBookItem.getItemId();
+            int requestedStudentId = requestedGradeBookItem.getStudents().get(0).getId();
+            LOG.debug("Request itemID = {} and studentId = {}", requestItemId, requestedStudentId);
 
             GradeBookItem existingItem = gradeBookItemMap.get(requestItemId);
+            LOG.debug("Existing Item = {}", existingItem);
+            if(existingItem.getItemId() == 0 && existingItem.getItemName() == null && existingItem.getItemMax() == 0){
+                LOG.debug("<---Existing Item values setting--->");
+            
+                existingItem.setItemId(requestItemId);
+                existingItem.setItemName(requestedGradeBookItem.getItemName());
+                existingItem.setItemMax(requestedGradeBookItem.getItemMax());
+            }
+
             List<Student> existingStudents = existingItem.getStudents();
+            LOG.debug("Existing Students = {}", existingStudents);
+
+            if (existingStudents == null) {
+                existingStudents = new ArrayList<Student>();
+            }
 
             // checking if grade item and student record already exists
             for (Student existStudent : existingStudents) {
                 if (existStudent.getId() == requestedStudentId) {
+                    LOG.debug("Student already exist = {}", existStudent.getId());
+
                     doesExist = true;
                     LOG.info("Creating a {} {} Status Response", Response.Status.CONFLICT.getStatusCode(), Response.Status.CONFLICT.getReasonPhrase());
                     LOG.debug("Cannot create Gradebook Resource as student already exists {}", content);
@@ -93,12 +110,12 @@ public class GradeBookResource {
                 LOG.debug("Attempting to create a student grade item resource and setting it to {}", content);
 
                 // retrieving details of student from request
+                LOG.debug("New student id to be created = {}", requestedGradeBookItem.getStudents().get(0).getId());
                 Student requestedStudent = requestedGradeBookItem.getStudents().get(0);
 
                 // creating a new student and updating the grade item
                 Student newStudent = new Student();
                 newStudent.setId(requestedStudentId);
-                newStudent.setName(requestedStudent.getName());
                 newStudent.setScore(requestedStudent.getScore());
                 newStudent.setFeedback(requestedStudent.getFeedback());
                 newStudent.setGraded(true);
@@ -109,7 +126,7 @@ public class GradeBookResource {
 
                 LOG.info("Creating a {} {} Status Response", Response.Status.CREATED.getStatusCode(), Response.Status.CREATED.getReasonPhrase());
                 String xmlString = Converter.convertFromObjectToXml(existingItem, GradeBookItem.class);
-                URI locationURI = URI.create(context.getAbsolutePath() + "/" + studentId);
+                URI locationURI = URI.create(context.getAbsolutePath() + "/" + requestedStudentId);
                 response = Response.status(Response.Status.CREATED).location(locationURI).entity(xmlString).build();
             }
         } catch (JAXBException e) {
@@ -158,7 +175,7 @@ public class GradeBookResource {
                     if (student.getId() == requestedStudentId) {
                         doesExist = true;
                         LOG.info("Creating a {} {} Status Response", Response.Status.OK.getStatusCode(), Response.Status.OK.getReasonPhrase());
-                        LOG.debug("Retrieving the student resource {}", student.getId() + ", " + student.getName());
+                        LOG.debug("Retrieving the student resource {}", student.getId());
                         break;
                     }
                 }
@@ -170,7 +187,6 @@ public class GradeBookResource {
                 } else {
                     String xmlString = Converter.convertFromObjectToXml(existingItem, GradeBookItem.class);
                     response = Response.status(Response.Status.OK).entity(xmlString).build();
-
                 }
             }
         } catch (Exception e) {
@@ -218,7 +234,6 @@ public class GradeBookResource {
                 for (Student student : existingStudents) {
                     if (student.getId() == requestedStudentId) {
                         doesExist = true;
-                        student.setName(updatedStudent.getName());
                         student.setFeedback(updatedStudent.getFeedback());
                         student.setScore(updatedStudent.getScore());
                         oldStudent = student;
@@ -289,7 +304,7 @@ public class GradeBookResource {
                     if (student.getId() == requestedStudentId) {
                         doesExist = true;
                         LOG.info("Creating a {} {} Status Response", Response.Status.OK.getStatusCode(), Response.Status.OK.getReasonPhrase());
-                        LOG.debug("Retrieving the student resource {}", student.getId() + ", " + student.getName());
+                        LOG.debug("Retrieving the student resource {}", student.getId());
                         break;
                     }
                 }

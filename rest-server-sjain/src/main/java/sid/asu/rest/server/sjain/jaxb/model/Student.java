@@ -5,14 +5,13 @@
  */
 package sid.asu.rest.server.sjain.jaxb.model;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  *
  * @author Siddharth
  */
-@XmlRootElement(name = "Student")
+@XmlType(propOrder = { "id", "score", "feedback", "graded", "appealStatus"})
 public class Student {
 
     public enum GradeAppeal {
@@ -20,7 +19,6 @@ public class Student {
     }
 
     private int id;
-    private String name;
     private int score;
     private String feedback;
     private boolean graded;
@@ -29,16 +27,14 @@ public class Student {
     public Student() {
     }
 
-    public Student(int id, String name, int score, String feedback, boolean graded, GradeAppeal status) {
+    public Student(int id, int score, String feedback, boolean graded, GradeAppeal status) {
         this.id = id;
-        this.name = name;
         this.score = score;
         this.feedback = feedback;
         this.graded = graded;
         this.appealStatus = status;
     }
 
-    @XmlElement(name = "id")
     public int getId() {
         return id;
     }
@@ -47,16 +43,6 @@ public class Student {
         this.id = id;
     }
 
-    @XmlElement(name = "name")
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @XmlElement(name = "score")
     public int getScore() {
         return score;
     }
@@ -65,7 +51,6 @@ public class Student {
         this.score = score;
     }
 
-    @XmlElement(name = "feedback")
     public String getFeedback() {
         return feedback;
     }
@@ -74,7 +59,6 @@ public class Student {
         this.feedback = feedback;
     }
 
-    @XmlElement(name = "isGraded")
     public boolean isGraded() {
         return graded;
     }
@@ -83,7 +67,6 @@ public class Student {
         this.graded = graded;
     }
 
-    @XmlElement(name = "appealStatus")
     public GradeAppeal getAppealStatus() {
         return appealStatus;
     }
