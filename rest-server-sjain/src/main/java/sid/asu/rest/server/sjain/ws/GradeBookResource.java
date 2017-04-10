@@ -342,4 +342,129 @@ public class GradeBookResource {
         LOG.debug("Generated response {}", response);
         return response;
     }
+
+    @GET
+    @Path("student/{itemId}/{sid}")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response getStudentGrade(@PathParam("itemId") String itemId, @PathParam("sid") String studentId) {
+
+        LOG.debug("GET request for student");
+        LOG.debug("PathParam id = {}, {}", itemId, studentId);
+
+        Response response = null;
+        boolean doesExist = false;
+        int requestedStudentId = Integer.parseInt(studentId);
+        int requestedItemId = Integer.parseInt(itemId);
+        GradeBookItem responseItem = new GradeBookItem();
+
+        try {
+            GradeBookItem existingItem = gradeBookItemMap.get(requestedItemId);
+            LOG.debug("Existing item id = {}, name = {}, max score = {}", existingItem.getItemId(), existingItem.getItemName(), existingItem.getItemMax());
+
+            if (existingItem.getStudents() == null) {
+                LOG.debug("Existing item students = {}", existingItem.getStudents());
+                LOG.info("Creating a {} {} Status Response", Response.Status.GONE.getStatusCode(), Response.Status.GONE.getReasonPhrase());
+
+                response = Response.status(Response.Status.GONE).entity("No Gradebook item resource to return").build();
+
+            } else { // if grading item exists, then check if the requested student details are present
+                responseItem.setItemId(requestedItemId);
+                responseItem.setItemName(existingItem.getItemName());
+                responseItem.setItemMax(existingItem.getItemMax());
+                List<Student> newStudentList = new ArrayList<Student>();
+
+                List<Student> existingStudents = existingItem.getStudents();
+                LOG.debug("Existing Students = {}", existingStudents);
+
+                for (Student student : existingStudents) {
+                    if (student.getId() == requestedStudentId) {
+                        LOG.debug("Requested studentId {} found", student.getId());
+                        newStudentList.add(student);
+                        doesExist = true;
+                        break;
+                    }
+                }
+
+                // if the requested student is not found
+                if (doesExist) {
+                    LOG.info("Creating a {} {} Status Response", Response.Status.OK.getStatusCode(), Response.Status.OK.getReasonPhrase());
+
+                    responseItem.setStudents(newStudentList);
+                    String xmlString = Converter.convertFromObjectToXml(responseItem, GradeBookItem.class);
+                    response = Response.status(Response.Status.OK).entity(xmlString).build();
+
+                } else {
+                    LOG.info("Creating a {} {} Status Response", Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
+                    response = Response.status(Response.Status.NOT_FOUND).entity("Requested student record found").build();
+
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Error: " + e);
+            LOG.info("Creating a {} {} Status Response", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
+
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error: check the server logs").build();
+        }
+
+        LOG.debug("Returning the value {}", response);
+        return response;
+    }
+
+    @PUT
+    @Path("student/{itemId}/{sid}")
+    @Consumes(MediaType.APPLICATION_XML)
+    public Response updateStudentAppealStatus(@PathParam("itemId") String itemId, @PathParam("sid") String studentId) {
+        LOG.debug("PUT request for student appeal");
+        LOG.debug("PathParam id = {}, {}", itemId, studentId);
+
+        Response response = null;
+        boolean doesExist = false;
+        int requestedItemId = Integer.parseInt(itemId);
+        int requestedStudentId = Integer.parseInt(studentId);
+
+        try {
+            GradeBookItem existingItem = gradeBookItemMap.get(requestedItemId);
+
+            // checking if the grading item exists or not
+            if (existingItem.getStudents() == null) {
+                LOG.info("Creating a {} {} Status Response", Response.Status.CONFLICT.getStatusCode(), Response.Status.CONFLICT.getReasonPhrase());
+                LOG.debug("Cannot update gradebook item resource {} as it has not yet been created");
+                response = Response.status(Response.Status.CONFLICT).entity("No student record ever created to update").build();
+
+            } else { // checking if the student record that needs to be updated exists
+
+                List<Student> existingStudents = existingItem.getStudents();
+                for (Student student : existingStudents) {
+                    if (student.getId() == requestedStudentId) {
+                        LOG.debug("student that needs to appeal found");
+                        doesExist = true;
+                        student.setAppealStatus(Student.GradeAppeal.APPEALED);
+                        break;
+                    }
+                }
+
+                if (doesExist) {
+                    existingItem.setStudents(existingStudents);
+                    gradeBookItemMap.put(requestedItemId, existingItem);
+
+                    LOG.info("Creating a {} {} Status Response", Response.Status.OK.getStatusCode(), Response.Status.OK.getReasonPhrase());
+                    response = Response.status(Response.Status.OK).entity("student appeal status updated successfully").build();
+
+                } else {
+                    LOG.info("Creating a {} {} Status Response", Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
+                    LOG.debug("Cannot update gradebook student item resource as its not available");
+                    response = Response.status(Response.Status.NOT_FOUND).entity("student record not found").build();
+                }
+            }
+        } catch (RuntimeException e) {
+            LOG.error("Error: " + e);
+            LOG.info("Creating a {} {} Status Response", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
+
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server crashed for some reason, check logs").build();
+        }
+
+        LOG.debug("Generated response {}", response);
+        return response;
+    }
+
 }
