@@ -61,12 +61,29 @@ public class GradeBook_CRUD_Client {
 
     public <T> T retrieveGradeBookItem(Class<T> responseType, String itemId, String sid) throws UniformInterfaceException {
         LOG.info("Initiating a Retrieve request");
-        LOG.debug("responseType = {}", responseType.getClass());
         LOG.debug("itemId = {}", itemId);
         LOG.debug("sid = {}", sid);
         String queryParams = itemId + "/" + sid;
 
         return webResource.path(queryParams).accept(MediaType.APPLICATION_XML).get(responseType);
+    }
+
+    public <T> T getStudentGradeBookItem(Class<T> responseType, String itemId, String sid) throws UniformInterfaceException {
+        LOG.info("Initiating a retrieve student grade request");
+        LOG.debug("itemId = {}", itemId);
+        LOG.debug("sid = {}", sid);
+        String queryParams = "student" + "/" + itemId + "/" + sid;
+
+        return webResource.path(queryParams).accept(MediaType.APPLICATION_XML).get(responseType);
+    }
+
+    public ClientResponse updateStudentAppealItem(String itemId, String sid) throws UniformInterfaceException {
+        LOG.info("Initiating an update appeal status request");
+        LOG.debug("itemId = {}", itemId);
+        LOG.debug("sid = {}", sid);
+        String queryParams = "student" + "/" + itemId + "/" + sid;
+
+        return webResource.path(queryParams).type(MediaType.APPLICATION_XML).put(ClientResponse.class);
     }
 
     public void close() {

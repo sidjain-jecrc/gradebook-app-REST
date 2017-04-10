@@ -30,6 +30,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
     private static final int ASSIGNMENTS = 500;
     private static final int MID_TERM = 501;
     private static final int FINAL_EXAM = 502;
+    private static boolean getGradeSelected = false;
 
     /**
      * Creates new form GradeBook_CRUD_UI
@@ -39,6 +40,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
         gradeBook_CRUD_client = new GradeBook_CRUD_Client();
         jLabelError.setVisible(false);
         jLabelEmptyError.setVisible(false);
+        jLabelStudentIdMissing.setVisible(false);
     }
 
     private String convertFormToXMLString() {
@@ -111,7 +113,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
         return xmlString;
     }
 
-    private void populateForm(ClientResponse clientResponse) {
+    private void populateInstructorForm(ClientResponse clientResponse) {
         LOG.info("Populating the UI with the Gradebook info");
 
         String entity = clientResponse.getEntity(String.class);
@@ -131,12 +133,14 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                         jTextFieldStudentId.setText(Integer.toString(student.getId()));
                         jTextFieldStudentScore.setText(Integer.toString(student.getScore()));
                         jTextFieldFeedback.setText(student.getFeedback());
+                        jLabelStudentAppeal.setText(String.valueOf(student.getAppealStatus()));
                     }
                 }
             } else {
                 jTextFieldItemMaxScore.setText("");
                 jTextFieldStudentScore.setText("");
                 jTextFieldFeedback.setText("");
+                jLabelStudentAppeal.setText("");
             }
 
             // Populate HTTP Header Information
@@ -152,6 +156,50 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
 
         } catch (JAXBException e) {
             LOG.error(e.getMessage());
+        }
+    }
+
+    private void populateStudentForm(ClientResponse clientResponse) {
+        LOG.info("Populating the Student form UI with the Gradebook info");
+
+        String entity = clientResponse.getEntity(String.class);
+        LOG.debug("The Client Response entity is {}", entity);
+
+        try {
+            if ((clientResponse.getStatus() == Response.Status.OK.getStatusCode())) {
+                if (getGradeSelected) {
+                    GradeBookItem gradeBookItem = (GradeBookItem) Converter.convertFromXmlToObject(entity, GradeBookItem.class);
+                    LOG.debug("The Client Response student gradebook object is {}", gradeBookItem);
+
+                    // Populate gradebook info
+                    Student resStudent = gradeBookItem.getStudents().get(0);
+                    LOG.debug("The response student is {}", resStudent);
+
+                    jLabelStudentScore.setText(Integer.toString(resStudent.getScore()));
+                    jLabelStudentFeedback.setText(resStudent.getFeedback());
+                    jLabelStudentAppeal1.setText(String.valueOf(resStudent.getAppealStatus()));
+
+                    getGradeSelected = false;
+                } else {
+                    jLabelStudentScore.setText("");
+                    jLabelStudentFeedback.setText("");
+                    jLabelStudentAppeal1.setText("");
+                }
+
+            } else {
+                jLabelStudentScore.setText("");
+                jLabelStudentFeedback.setText("");
+                jLabelStudentAppeal1.setText("");
+            }
+
+            // Populate HTTP Header Information
+            jTextFieldHttpStatusCode.setText(Integer.toString(clientResponse.getStatus()));
+            jTextFieldMediaType.setText(clientResponse.getType().toString());
+
+        } catch (JAXBException e) {
+            LOG.error("JAXB Exception: " + e.getMessage());
+        } catch (Exception e) {
+            LOG.error("General Exception:" + e.getMessage());
         }
     }
 
@@ -192,6 +240,22 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
         jButtonClear = new javax.swing.JButton();
         jLabelError = new javax.swing.JLabel();
         jLabelEmptyError = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        jTextFieldStudentId1 = new javax.swing.JTextField();
+        jLabel14 = new javax.swing.JLabel();
+        jComboBoxGradeItems1 = new javax.swing.JComboBox<>();
+        jLabel15 = new javax.swing.JLabel();
+        jLabelStudentScore = new javax.swing.JLabel();
+        jLabel16 = new javax.swing.JLabel();
+        jLabelStudentFeedback = new javax.swing.JLabel();
+        jButtonGetGrade = new javax.swing.JButton();
+        jButtonAppealGrade = new javax.swing.JButton();
+        jLabel17 = new javax.swing.JLabel();
+        jLabelStudentAppeal = new javax.swing.JLabel();
+        jLabel18 = new javax.swing.JLabel();
+        jLabelStudentAppeal1 = new javax.swing.JLabel();
+        jLabelStudentIdMissing = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -231,7 +295,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
         });
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
-        jLabel2.setText("Grade Book Values");
+        jLabel2.setText("Grade Book Entry (Instructor)");
 
         jLabel3.setText("Student ID :");
 
@@ -288,28 +352,54 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
         jLabelEmptyError.setForeground(new java.awt.Color(255, 0, 0));
         jLabelEmptyError.setText("Fill required fields");
 
+        jLabel12.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+        jLabel12.setText("Grade Book (Student)");
+
+        jLabel13.setText("Student ID :");
+
+        jTextFieldStudentId1.setToolTipText("Student ID");
+
+        jLabel14.setText("Grading Item :");
+
+        jComboBoxGradeItems1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Assignment (30%)", "Mid Term (30%)", "Final Exam (40%)" }));
+
+        jLabel15.setText("Student Score :");
+
+        jLabelStudentScore.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+
+        jLabel16.setText("Feedback :");
+
+        jLabelStudentFeedback.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+
+        jButtonGetGrade.setText("Get Grade");
+        jButtonGetGrade.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonGetGradeActionPerformed(evt);
+            }
+        });
+
+        jButtonAppealGrade.setText("Appeal Grade");
+        jButtonAppealGrade.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAppealGradeActionPerformed(evt);
+            }
+        });
+
+        jLabel17.setText("Appeal Status :");
+
+        jLabelStudentAppeal.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+
+        jLabel18.setText("Appeal Status :");
+
+        jLabelStudentAppeal1.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+
+        jLabelStudentIdMissing.setForeground(new java.awt.Color(255, 51, 51));
+        jLabelStudentIdMissing.setText("Please enter student id");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(120, 120, 120)
-                        .addComponent(jLabel8))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(37, 37, 37)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel10)
-                            .addComponent(jLabel9)
-                            .addComponent(jLabel11))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldResourceLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 354, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(jTextFieldHttpStatusCode, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
-                                .addComponent(jTextFieldMediaType, javax.swing.GroupLayout.Alignment.LEADING)))))
-                .addContainerGap(46, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -323,87 +413,195 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(38, 38, 38)
                         .addComponent(jLabel1)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 119, Short.MAX_VALUE)
+                .addGap(113, 113, 113)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                    .addComponent(jLabel5)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jComboBoxGradeItems, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                    .addComponent(jLabel4)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jTextFieldStudentScore, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                    .addComponent(jLabel6)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jTextFieldItemMaxScore, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel3)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jTextFieldStudentId, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                    .addComponent(jLabel7)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jTextFieldFeedback, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel3)
+                                .addComponent(jLabel17)
                                 .addGap(18, 18, 18)
-                                .addComponent(jTextFieldStudentId, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel5)
-                                .addGap(18, 18, 18)
-                                .addComponent(jComboBoxGradeItems, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel4)
-                                .addGap(18, 18, 18)
-                                .addComponent(jTextFieldStudentScore, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel6)
-                                .addGap(18, 18, 18)
-                                .addComponent(jTextFieldItemMaxScore, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jButtonCrudSubmit)
-                                .addGap(18, 18, 18)
-                                .addComponent(jButtonClear))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel7)
-                                .addGap(18, 18, 18)
+                                .addComponent(jLabelStudentAppeal)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 73, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 6, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabelEmptyError)
-                                    .addComponent(jTextFieldFeedback, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(88, 88, 88))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addGap(154, 154, 154))))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addComponent(jLabel12)
+                                        .addGap(50, 50, 50))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addComponent(jButtonGetGrade)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jButtonAppealGrade))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addGap(14, 14, 14)
+                                            .addComponent(jLabel13)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(jTextFieldStudentId1, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(jLabel14)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(jComboBoxGradeItems1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel18)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabelStudentAppeal1))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel15)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabelStudentScore))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(25, 25, 25)
+                                        .addComponent(jLabel16)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabelStudentFeedback))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(59, 59, 59)
+                                        .addComponent(jLabelStudentIdMissing)))
+                                .addGap(50, 50, 50)))
+                        .addGap(65, 65, 65))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel10)
+                                    .addComponent(jLabel9)
+                                    .addComponent(jLabel11))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jTextFieldResourceLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 354, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(jTextFieldHttpStatusCode, javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jTextFieldMediaType, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(83, 83, 83)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                            .addComponent(jButtonCrudSubmit)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(jButtonClear, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(jLabelEmptyError)
+                                            .addGap(35, 35, 35)))
+                                    .addComponent(jLabel8))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(27, 27, 27)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel2))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jTextFieldStudentId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel3))
-                    .addComponent(jRadioButtonCreate, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jComboBoxGradeItems, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel5))
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jTextFieldStudentId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel3))
+                            .addComponent(jRadioButtonCreate, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextFieldStudentScore, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextFieldItemMaxScore, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel6))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextFieldFeedback, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel7)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jComboBoxGradeItems, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel5))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jTextFieldStudentScore, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel4))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jTextFieldItemMaxScore, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel6))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jTextFieldFeedback, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel7))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel17)
+                                    .addComponent(jLabelStudentAppeal)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jRadioButtonRead)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jRadioButtonUpdate)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jRadioButtonDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabelError)))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jRadioButtonRead)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jRadioButtonUpdate)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jRadioButtonDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabelError)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel12)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextFieldStudentId1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel13))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(108, 108, 108)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(48, 48, 48)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(jButtonGetGrade)
+                                            .addComponent(jButtonAppealGrade)))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(14, 14, 14)
+                                        .addComponent(jLabelStudentIdMissing))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jComboBoxGradeItems1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel15)
+                                    .addComponent(jLabelStudentScore))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel16)
+                                    .addComponent(jLabelStudentFeedback))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel18)
+                                    .addComponent(jLabelStudentAppeal1))
+                                .addGap(72, 72, 72)))))
+                .addGap(24, 24, 24)
                 .addComponent(jLabelEmptyError)
                 .addGap(17, 17, 17)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonClear)
                     .addComponent(jButtonCrudSubmit))
-                .addGap(22, 22, 22)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
                 .addComponent(jLabel8)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -417,7 +615,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
                     .addComponent(jTextFieldResourceLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addGap(22, 22, 22))
         );
 
         pack();
@@ -440,7 +638,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                 ClientResponse clientResponse = gradeBook_CRUD_client.createGradeBookItem(this.convertFormToXMLString());
                 resourceURI = clientResponse.getLocation();
                 LOG.debug("Retrieved location {}", resourceURI);
-                this.populateForm(clientResponse);
+                this.populateInstructorForm(clientResponse);
             } else {
                 jLabelEmptyError.setVisible(true);
             }
@@ -470,7 +668,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
             String studentId = jTextFieldStudentId.getText();
             if (!studentId.equals("")) {
                 ClientResponse clientResponse = gradeBook_CRUD_client.retrieveGradeBookItem(ClientResponse.class, gradeItemId, studentId);
-                this.populateForm(clientResponse);
+                this.populateInstructorForm(clientResponse);
             } else {
                 jLabelEmptyError.setVisible(true);
             }
@@ -487,7 +685,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
 
             if (!itemMaxScore.equals("") && !studentId.equals("") && !studentScore.equals("") && !studentFeedback.equals("")) {
                 ClientResponse clientResponse = gradeBook_CRUD_client.updateGradeBookItem(this.convertFormToXMLString(), studentId);
-                this.populateForm(clientResponse);
+                this.populateInstructorForm(clientResponse);
             } else {
                 jLabelEmptyError.setVisible(true);
             }
@@ -582,6 +780,71 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jRadioButtonDeleteActionPerformed
 
+    private void jButtonGetGradeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGetGradeActionPerformed
+        LOG.debug("Invoking {} action", jButtonGetGrade.getText());
+        jLabelStudentIdMissing.setVisible(false);
+
+        String gradeItem = jComboBoxGradeItems1.getSelectedItem().toString();
+        String gradeItemId = null;
+        switch (gradeItem) {
+            case "Assignment (30%)":
+                gradeItemId = Integer.toString(ASSIGNMENTS);
+                break;
+            case "Mid Term (30%)":
+                gradeItemId = Integer.toString(MID_TERM);
+                break;
+            case "Final Exam (40%)":
+                gradeItemId = Integer.toString(FINAL_EXAM);
+                break;
+            default:
+                LOG.error("Something went wrong while fetching data from combox box");
+                break;
+        }
+
+        String studentId = jTextFieldStudentId1.getText();
+        if (!studentId.equals("")) {
+            getGradeSelected = true;
+            ClientResponse clientResponse = gradeBook_CRUD_client.getStudentGradeBookItem(ClientResponse.class, gradeItemId, studentId);
+            this.populateStudentForm(clientResponse);
+        } else {
+            jLabelEmptyError.setVisible(true);
+        }
+
+    }//GEN-LAST:event_jButtonGetGradeActionPerformed
+
+    private void jButtonAppealGradeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAppealGradeActionPerformed
+        // TODO add your handling code here:
+        LOG.debug("Invoking {} action", jButtonAppealGrade.getText());
+        jLabelStudentIdMissing.setVisible(false);
+
+        String gradeItem = jComboBoxGradeItems1.getSelectedItem().toString();
+        String gradeItemId = null;
+        switch (gradeItem) {
+            case "Assignment (30%)":
+                gradeItemId = Integer.toString(ASSIGNMENTS);
+                break;
+            case "Mid Term (30%)":
+                gradeItemId = Integer.toString(MID_TERM);
+                break;
+            case "Final Exam (40%)":
+                gradeItemId = Integer.toString(FINAL_EXAM);
+                break;
+            default:
+                LOG.error("Something went wrong while fetching data from combox box");
+                break;
+        }
+
+        String studentId = jTextFieldStudentId1.getText();
+        if (!studentId.equals("")) {
+            ClientResponse clientResponse = gradeBook_CRUD_client.updateStudentAppealItem(gradeItemId, studentId);
+            this.populateStudentForm(clientResponse);
+        } else {
+            jLabelEmptyError.setVisible(true);
+        }
+
+
+    }//GEN-LAST:event_jButtonAppealGradeActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -619,12 +882,22 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupCrud;
+    private javax.swing.JButton jButtonAppealGrade;
     private javax.swing.JButton jButtonClear;
     private javax.swing.JButton jButtonCrudSubmit;
+    private javax.swing.JButton jButtonGetGrade;
     private javax.swing.JComboBox<String> jComboBoxGradeItems;
+    private javax.swing.JComboBox<String> jComboBoxGradeItems1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -635,6 +908,11 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelEmptyError;
     private javax.swing.JLabel jLabelError;
+    private javax.swing.JLabel jLabelStudentAppeal;
+    private javax.swing.JLabel jLabelStudentAppeal1;
+    private javax.swing.JLabel jLabelStudentFeedback;
+    private javax.swing.JLabel jLabelStudentIdMissing;
+    private javax.swing.JLabel jLabelStudentScore;
     private javax.swing.JRadioButton jRadioButtonCreate;
     private javax.swing.JRadioButton jRadioButtonDelete;
     private javax.swing.JRadioButton jRadioButtonRead;
@@ -645,6 +923,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
     private javax.swing.JTextField jTextFieldMediaType;
     private javax.swing.JTextField jTextFieldResourceLocation;
     private javax.swing.JTextField jTextFieldStudentId;
+    private javax.swing.JTextField jTextFieldStudentId1;
     private javax.swing.JTextField jTextFieldStudentScore;
     // End of variables declaration//GEN-END:variables
 }
