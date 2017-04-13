@@ -41,6 +41,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
         jLabelError.setVisible(false);
         jLabelEmptyError.setVisible(false);
         jLabelStudentIdMissing.setVisible(false);
+        jLabelScoreError.setVisible(false);
     }
 
     private String convertFormToXMLString() {
@@ -74,10 +75,10 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
             }
         }
         try {
-            String itemMaxScore = jTextFieldItemMaxScore.getText();
-            String studentId = jTextFieldStudentId.getText();
-            String studentScore = jTextFieldStudentScore.getText();
-            String studentFeedback = jTextFieldFeedback.getText();
+            String itemMaxScore = jTextFieldItemMaxScore.getText().trim();
+            String studentId = jTextFieldStudentId.getText().trim();
+            String studentScore = jTextFieldStudentScore.getText().trim();
+            String studentFeedback = jTextFieldFeedback.getText().trim();
 
             List<Student> students = new ArrayList<>();
             Student student = new Student();
@@ -256,8 +257,12 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
         jLabel18 = new javax.swing.JLabel();
         jLabelStudentAppeal1 = new javax.swing.JLabel();
         jLabelStudentIdMissing = new javax.swing.JLabel();
+        jLabelScoreError = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBounds(new java.awt.Rectangle(0, 0, 0, 0));
+        setResizable(false);
+        setSize(new java.awt.Dimension(840, 510));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
         jLabel1.setText("Action");
@@ -396,6 +401,9 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
         jLabelStudentIdMissing.setForeground(new java.awt.Color(255, 51, 51));
         jLabelStudentIdMissing.setText("Please enter student id");
 
+        jLabelScoreError.setForeground(new java.awt.Color(255, 51, 51));
+        jLabelScoreError.setText("Student score can't be greater than max score");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -502,15 +510,15 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(83, 83, 83)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                            .addComponent(jButtonCrudSubmit)
-                                            .addGap(18, 18, 18)
-                                            .addComponent(jButtonClear, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(jLabelEmptyError)
-                                            .addGap(35, 35, 35)))
-                                    .addComponent(jLabel8))))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jButtonCrudSubmit)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jButtonClear, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel8)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabelEmptyError)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabelScoreError)))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
@@ -596,7 +604,9 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                                     .addComponent(jLabelStudentAppeal1))
                                 .addGap(72, 72, 72)))))
                 .addGap(24, 24, 24)
-                .addComponent(jLabelEmptyError)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelEmptyError)
+                    .addComponent(jLabelScoreError))
                 .addGap(17, 17, 17)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonClear)
@@ -629,16 +639,24 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
             jLabelError.setVisible(false);
             jLabelEmptyError.setVisible(false);
 
-            String itemMaxScore = jTextFieldItemMaxScore.getText();
-            String studentId = jTextFieldStudentId.getText();
-            String studentScore = jTextFieldStudentScore.getText();
-            String studentFeedback = jTextFieldFeedback.getText();
+            String itemMaxScore = jTextFieldItemMaxScore.getText().trim();
+            String studentId = jTextFieldStudentId.getText().trim();
+            String studentScore = jTextFieldStudentScore.getText().trim();
+            String studentFeedback = jTextFieldFeedback.getText().trim();
 
             if (!itemMaxScore.equals("") && !studentId.equals("") && !studentScore.equals("") && !studentFeedback.equals("")) {
-                ClientResponse clientResponse = gradeBook_CRUD_client.createGradeBookItem(this.convertFormToXMLString());
-                resourceURI = clientResponse.getLocation();
-                LOG.debug("Retrieved location {}", resourceURI);
-                this.populateInstructorForm(clientResponse);
+
+                if (Integer.parseInt(studentScore) > Integer.parseInt(itemMaxScore)) {
+                    jLabelScoreError.setVisible(true);
+
+                } else {
+                    jLabelScoreError.setVisible(false);
+                    ClientResponse clientResponse = gradeBook_CRUD_client.createGradeBookItem(this.convertFormToXMLString());
+                    resourceURI = clientResponse.getLocation();
+                    LOG.debug("Retrieved location {}", resourceURI);
+                    this.populateInstructorForm(clientResponse);
+                }
+
             } else {
                 jLabelEmptyError.setVisible(true);
             }
@@ -665,7 +683,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                     break;
             }
 
-            String studentId = jTextFieldStudentId.getText();
+            String studentId = jTextFieldStudentId.getText().trim();
             if (!studentId.equals("")) {
                 ClientResponse clientResponse = gradeBook_CRUD_client.retrieveGradeBookItem(ClientResponse.class, gradeItemId, studentId);
                 this.populateInstructorForm(clientResponse);
@@ -678,14 +696,20 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
             jLabelError.setVisible(false);
             jLabelEmptyError.setVisible(false);
 
-            String itemMaxScore = jTextFieldItemMaxScore.getText();
-            String studentId = jTextFieldStudentId.getText();
-            String studentScore = jTextFieldStudentScore.getText();
-            String studentFeedback = jTextFieldFeedback.getText();
+            String itemMaxScore = jTextFieldItemMaxScore.getText().trim();
+            String studentId = jTextFieldStudentId.getText().trim();
+            String studentScore = jTextFieldStudentScore.getText().trim();
+            String studentFeedback = jTextFieldFeedback.getText().trim();
 
             if (!itemMaxScore.equals("") && !studentId.equals("") && !studentScore.equals("") && !studentFeedback.equals("")) {
-                ClientResponse clientResponse = gradeBook_CRUD_client.updateGradeBookItem(this.convertFormToXMLString(), studentId);
-                this.populateInstructorForm(clientResponse);
+                if (Integer.parseInt(studentScore) > Integer.parseInt(itemMaxScore)) {
+                    jLabelScoreError.setVisible(true);
+
+                } else {
+                    jLabelScoreError.setVisible(false);
+                    ClientResponse clientResponse = gradeBook_CRUD_client.updateGradeBookItem(this.convertFormToXMLString(), studentId);
+                    this.populateInstructorForm(clientResponse);
+                }
             } else {
                 jLabelEmptyError.setVisible(true);
             }
@@ -713,7 +737,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                     break;
             }
 
-            String studentId = jTextFieldStudentId.getText();
+            String studentId = jTextFieldStudentId.getText().trim();
             if (!studentId.equals("")) {
                 ClientResponse clientResponse = gradeBook_CRUD_client.deleteGradeBookItem(gradeItemId, studentId);
                 jTextFieldHttpStatusCode.setText(Integer.toString(clientResponse.getStatus()));
@@ -801,7 +825,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
                 break;
         }
 
-        String studentId = jTextFieldStudentId1.getText();
+        String studentId = jTextFieldStudentId1.getText().trim();
         if (!studentId.equals("")) {
             getGradeSelected = true;
             ClientResponse clientResponse = gradeBook_CRUD_client.getStudentGradeBookItem(ClientResponse.class, gradeItemId, studentId);
@@ -908,6 +932,7 @@ public class GradeBook_CRUD_UI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelEmptyError;
     private javax.swing.JLabel jLabelError;
+    private javax.swing.JLabel jLabelScoreError;
     private javax.swing.JLabel jLabelStudentAppeal;
     private javax.swing.JLabel jLabelStudentAppeal1;
     private javax.swing.JLabel jLabelStudentFeedback;
