@@ -84,6 +84,12 @@ public class GradeBookResource {
                 existingItem.setItemMax(requestedGradeBookItem.getItemMax());
             }
 
+            GradeBookItem responseGradeBookItem = new GradeBookItem();
+            responseGradeBookItem.setItemId(requestItemId);
+            responseGradeBookItem.setItemName(requestedGradeBookItem.getItemName());
+            responseGradeBookItem.setItemMax(requestedGradeBookItem.getItemMax());
+            List<Student> newStudentList = new ArrayList<Student>();
+
             List<Student> existingStudents = existingItem.getStudents();
             LOG.debug("Existing Students = {}", existingStudents);
 
@@ -124,8 +130,12 @@ public class GradeBookResource {
                 existingItem.setStudents(existingStudents);
                 gradeBookItemMap.put(requestItemId, existingItem);
 
+                // setting student details in the response object
+                newStudentList.add(newStudent);
+                responseGradeBookItem.setStudents(newStudentList);
+
                 LOG.info("Creating a {} {} Status Response", Response.Status.CREATED.getStatusCode(), Response.Status.CREATED.getReasonPhrase());
-                String xmlString = Converter.convertFromObjectToXml(existingItem, GradeBookItem.class);
+                String xmlString = Converter.convertFromObjectToXml(responseGradeBookItem, GradeBookItem.class);
                 URI locationURI = URI.create(context.getAbsolutePath() + "/" + requestItemId + "/" + requestedStudentId);
                 response = Response.status(Response.Status.CREATED).location(locationURI).entity(xmlString).build();
             }
@@ -161,6 +171,7 @@ public class GradeBookResource {
         int requestedItemId = Integer.parseInt(itemId);
 
         try {
+            GradeBookItem responseGradeItem = new GradeBookItem();
             GradeBookItem existingItem = gradeBookItemMap.get(requestedItemId);
             LOG.debug("Existing item id = {}, name = {}, max score = {}", existingItem.getItemId(), existingItem.getItemName(), existingItem.getItemMax());
 
@@ -172,6 +183,11 @@ public class GradeBookResource {
 
             } else { // if grading item exists, then check if the requested student details are present
 
+                responseGradeItem.setItemId(existingItem.getItemId());
+                responseGradeItem.setItemMax(existingItem.getItemMax());
+                responseGradeItem.setItemName(existingItem.getItemName());
+                List<Student> newStudentList = new ArrayList<>();
+
                 List<Student> existingStudents = existingItem.getStudents();
                 LOG.debug("Existing Students = {}", existingStudents);
 
@@ -180,6 +196,7 @@ public class GradeBookResource {
                         LOG.debug("Requested studentId {} found", student.getId());
 
                         doesExist = true;
+                        newStudentList.add(student);
                         LOG.info("Creating a {} {} Status Response", Response.Status.OK.getStatusCode(), Response.Status.OK.getReasonPhrase());
                         break;
                     }
@@ -188,9 +205,10 @@ public class GradeBookResource {
                 // if the requested student is not found
                 if (!doesExist) {
                     LOG.info("Creating a {} {} Status Response", Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
-                    response = Response.status(Response.Status.NOT_FOUND).entity("Requested student record found").build();
+                    response = Response.status(Response.Status.NOT_FOUND).entity("Requested student record not found").build();
                 } else {
-                    String xmlString = Converter.convertFromObjectToXml(existingItem, GradeBookItem.class);
+                    responseGradeItem.setStudents(newStudentList);
+                    String xmlString = Converter.convertFromObjectToXml(responseGradeItem, GradeBookItem.class);
                     response = Response.status(Response.Status.OK).entity(xmlString).build();
                 }
             }
